@@ -1,4 +1,4 @@
-from debug import dlogger
+from debug import logger
 
 dlogger.logger.info(f"****CREATING DVR CLASS****")
 
