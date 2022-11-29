@@ -107,12 +107,19 @@ def parse_mcu(line):
     return mcu
 
 
-def update_dictionary(hostname, model, firmware, mcu):
-    dvrs.update({"Name": hostname})
-    dvrs.update({"Model": model})
-    dvrs.update({"firmware": firmware})
-    dvrs.update({"MCU": mcu})
-    print(f"{dvrs}")
+def update_dictionary(file, hostname, model, firmware, mcu):
+    if len(hostname) < 1:
+        dvrs.update({"Name": file})
+        dvrs.update({"Model": model})
+        dvrs.update({"firmware": firmware})
+        dvrs.update({"MCU": mcu})
+        print(f"{dvrs}")
+    elif len(hostname) > 0:
+        dvrs.update({"Name": hostname})
+        dvrs.update({"Model": model})
+        dvrs.update({"firmware": firmware})
+        dvrs.update({"MCU": mcu})
+        print(f"{dvrs}")
 
 
 def filter_log(lines):
@@ -149,6 +156,6 @@ if __name__ == '__main__':
         log.info(f"LINES COPIED")
         log.info(f"PARSING LINES")
         hostname, model, firmware, mcu = filter_log(lines)
-        update_dictionary(hostname, model, firmware, mcu)
+        update_dictionary(file, hostname, model, firmware, mcu)
     input("PRESS ENTER TWICE (x2) TO QUIT PROGRAM...")
     logger.end_log(log)
