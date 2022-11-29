@@ -1,8 +1,19 @@
 import os
-from datetime import datetime
-import psutil
 import easygui
-from past.builtins import raw_input
+from classes import dvr
+
+hostname = ""
+firmware = ""
+mcu = ""
+model = ""
+global rcmi, rcms, ksc, qdvr, csnw, ignon, pwroff, vsgnl, vsgnlon
+video_cameras = []
+dvrs = {
+    "Name": [],
+    "Model": [],
+    "Firmware": [],
+    "MCU": []
+}
 
 
 def select_folder():
@@ -65,14 +76,40 @@ def read_log(file):
                 break
     return lines
 
+def hostname(line):
+    if line.__contains__('hostname'):
+        temp_list = line.split(":", 5)
+        var = temp_list.pop()
+        formatted_var = format_string(var)
+        hostname = f"{formatted_var}"
+        dvrs.
+
+def firmware(line):
+    if line.__contains__('DVR Firmware'):
+        temp_list = line.split(":", 5)
+        var = temp_list.pop()
+        formatted_var = format_string(var)
+        firmware = f"{formatted_var}"
+        if firmware.__contains__('TITAN'):
+            model = "Zeus Titan"
+    return firmware
+
+
+def mcu(line):
+    if line.__contains__('MCU version'):
+        temp_list = line.split(":", 6)
+        var = temp_list.pop()
+        formatted_var = format_string(var)
+        mcu = f"{formatted_var}"
+    return mcu
+
+
+def recordMode(line):
+    if line.__contains__('Record initialized'):
+        rcmi += 1
+
 
 def filter_log(lines):
-    hostname = ""
-    firmware = ""
-    mcu = ""
-    model = ""
-    rcmi, rcms, ksc, qdvr, csnw, ignon, pwroff, vsgnl, vsgnlon = 0, 0, 0, 0, 0, 0, 0, 0, 0
-    video_cameras = []
     for line in lines:
         if line.__contains__('DVR Firmware'):
             temp_list = line.split(":", 5)
@@ -163,5 +200,4 @@ def parse(dvr_log_list):
 if __name__ == '__main__':
     file_list = scan()
     parse(file_list)
-    input("PRESS ENTER TO QUIT PROGRAM...")
-
+    input("PRESS ENTER TWICE (x2) TO QUIT PROGRAM...")
