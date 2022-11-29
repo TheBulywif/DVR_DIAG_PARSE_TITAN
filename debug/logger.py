@@ -7,7 +7,13 @@ version = 'DVRLPv11.22.01'
 
 
 def init_logger():
+    path = os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop', version)
     try:
+        if os.path.exists(path):
+            print(f"{path} EXISTS")
+        if not os.path.exists(path):
+            print(f"{path} DOES NOT EXIST")
+            os.makedirs(path)
         logger = logging.getLogger('DVRLP Logger')
         logger.setLevel(logging.DEBUG)
         # CREATE FILE HANDLE

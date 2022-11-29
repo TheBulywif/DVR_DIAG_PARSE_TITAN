@@ -3,12 +3,7 @@ import easygui
 from debug import logger
 
 video_cameras = []
-dvrs = {
-    "Name": [],
-    "Model": [],
-    "Firmware": [],
-    "MCU": []
-}
+
 
 
 def select_folder():
@@ -74,68 +69,46 @@ def read_log(file):
     return lines
 
 
-def parse_host(line):
-    hostname = ""
-    if line.__contains__('hostname'):
-        temp_list = line.split(":", 5)
-        var = temp_list.pop()
-        formatted_var = format_string(var)
-        hostname = f"{formatted_var}"
-    return hostname
-
-
-def parse_fw(line):
-    firmware = ""
-    model = ""
-    if line.__contains__('DVR Firmware'):
-        temp_list = line.split(":", 5)
-        var = temp_list.pop()
-        formatted_var = format_string(var)
-        firmware = f"{formatted_var}"
-        if "TITAN" in firmware:
-            model = "Zeus Titan"
-        elif "ZEUSHD16" in firmware:
-            model = "Zeus Platinum"
-    return firmware, model
-
-
-def parse_mcu(line):
-    mcu = ""
-    if line.__contains__('MCU version'):
-        temp_list = line.split(":", 6)
-        var = temp_list.pop()
-        formatted_var = format_string(var)
-        mcu = f"{formatted_var}"
-    return mcu
-
-
-def update_dictionary(file, hostname, model, firmware, mcu):
-    if len(hostname) < 1:
-        dvrs.update({"Name": file})
-        dvrs.update({"Model": model})
-        dvrs.update({"firmware": firmware})
-        dvrs.update({"MCU": mcu})
-    #  print(f"{dvrs}")
-    elif len(hostname) > 0:
-        dvrs.update({"Name": hostname})
-        dvrs.update({"Model": model})
-        dvrs.update({"firmware": firmware})
-        dvrs.update({"MCU": mcu})
-    #  print(f"{dvrs}")
-
-
 def filter_log(lines):
+    hostname = ""
+    model = ""
+    firmware = ""
+    mcu = ""
+    io_error = 0
+    watchdog_error = 0
     for line in lines:
-        hostname = parse_host(line)
-        firmware, model = parse_fw(line)
-        mcu = parse_mcu(line)
-    log.info(f"----DVR DEMOGRAPHICS----")
-    log.info(f"DVR NAME: {hostname}")
-    log.info(f"DVR MODEL: {model}")
-    log.info(f"FIRMWARE VERSION: {firmware}")
-    log.info(f"MCU VERSION: {mcu}")
-    print(f"{hostname, model, firmware, mcu}")
-    return hostname, model, firmware, mcu
+        if line.__contains__('hostname'):
+            temp_list = line.split(":", 5)
+            var = temp_list.pop()
+            formatted_var = format_string(var)
+            hostname = f"{formatted_var}"
+        if line.__contains__('DVR Firmware'):
+                log.debug(f"LINE CONTAINS FIRMWARE")
+                temp_list = line.split(":", 5)
+                var = temp_list.pop()
+                formatted_var = format_string(var)
+                firmware = formatted_var
+                log.debug(f"FIRMWARE: {firmware}")
+                if "TITAN" in firmware:
+                    model = "Zeus Titan"
+        if line.__contains__('MCU version'):
+            if len(mcu) == 0:
+                temp_list = line.split(":", 6)
+                var = temp_list.pop()
+                formatted_var = format_string(var)
+                mcu = f"{formatted_var}"
+        if line.__contains__('One or more camera not working, system reset'):
+            io_error += 1
+        if line.__contains__('Dvr watchdog failed, restarting dvrsvr'):
+            watchdog_error += 1
+    if model == "Zeus Titan":
+        print(f"Hostname: {hostname}")
+        print(f"Model: {model}")
+        print(f"Firmware: {firmware}")
+        print(f"MCU: {mcu}")
+        print(f"IO ERROR COUNT: {io_error}")
+        print(f"WATCHDOG ERROR COUNT: {watchdog_error}")
+    # print(f"Hostname: {hostname} - Model: {model} - Firmware: {firmware} - MCU: {mcu} - IO ERROR COUNT: {io_error}")
 
 
 def get_lines(file):
@@ -152,13 +125,18 @@ def get_lines(file):
 if __name__ == '__main__':
     log = logger.init_logger()
     logger.start_log(log)
+    print(f"----SCANNING FOR LOG FILES----")
     file_list = scan()
+    print(f"----{len(file_list)} LOGS FOUND----\n")
     for file in file_list:
+        print(f"\n****COPYING LOG FILE****")
         log.info(f"COPYING LINES FROM LOGFILE TO LIST")
         lines = get_lines(file)
+        print(f"{file}COPIED")
         log.info(f"LINES COPIED")
         log.info(f"PARSING LINES")
-        hostname, model, firmware, mcu = filter_log(lines)
-        update_dictionary(file, hostname, model, firmware, mcu)
+        print(f"****PARSING LINES****")
+        filter_log(lines)
+        print(f"****PARSE COMPLETE****\n")
     input("PRESS ENTER TWICE (x2) TO QUIT PROGRAM...")
     logger.end_log(log)
