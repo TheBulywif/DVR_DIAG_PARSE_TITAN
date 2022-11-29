@@ -2,8 +2,6 @@ import os
 import easygui
 from debug import logger
 
-
-global hostname, model, firmware, mcu
 video_cameras = []
 dvrs = {
     "Name": [],
