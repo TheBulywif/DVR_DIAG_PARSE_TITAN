@@ -3,7 +3,7 @@ import easygui
 from debug import logger
 
 video_cameras = []
-
+global dvr_with_issue
 
 
 def select_folder():
