@@ -92,8 +92,10 @@ def parse_fw(line):
         var = temp_list.pop()
         formatted_var = format_string(var)
         firmware = f"{formatted_var}"
-        if firmware.__contains__('TITAN'):
+        if "TITAN" in firmware:
             model = "Zeus Titan"
+        elif "ZEUSHD16" in firmware:
+            model = "Zeus Platinum"
     return firmware, model
 
 
@@ -113,13 +115,13 @@ def update_dictionary(file, hostname, model, firmware, mcu):
         dvrs.update({"Model": model})
         dvrs.update({"firmware": firmware})
         dvrs.update({"MCU": mcu})
-        print(f"{dvrs}")
+    #  print(f"{dvrs}")
     elif len(hostname) > 0:
         dvrs.update({"Name": hostname})
         dvrs.update({"Model": model})
         dvrs.update({"firmware": firmware})
         dvrs.update({"MCU": mcu})
-        print(f"{dvrs}")
+    #  print(f"{dvrs}")
 
 
 def filter_log(lines):
@@ -132,6 +134,7 @@ def filter_log(lines):
     log.info(f"DVR MODEL: {model}")
     log.info(f"FIRMWARE VERSION: {firmware}")
     log.info(f"MCU VERSION: {mcu}")
+    print(f"{hostname, model, firmware, mcu}")
     return hostname, model, firmware, mcu
 
 
