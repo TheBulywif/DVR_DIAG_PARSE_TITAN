@@ -1,7 +1,9 @@
 import os
 import easygui
+from past.builtins import raw_input
+
 from debug import logger
-from columnar import columnar
+
 
 fw_types = ["ZEUSTITAN.1.0.22.0729.14", "ZEUSTITAN.1.0.22.0812.15", "ZEUSTITAN.1.0.22.0906.13"]
 mcu_types = ["Z16RV1126_A2IRTC_V2.3_2208191530", "Z16RV1126_A2IRTC_V2.0_2207271159"]
@@ -176,6 +178,7 @@ def check_errors(titan_list):
 
 
 if __name__ == '__main__':
+    print(f"STARTING PROGRAM")
     log = logger.init_logger()
     logger.start_log(log)
     file_list, log_count = scan()
@@ -187,3 +190,4 @@ if __name__ == '__main__':
     check_errors(titan_list)
     #  print(f"{titan_list}")  # DEBUG
     input(f"PRESS ENTER TWICE (x2) TO QUIT PROGRAM")
+    logger.end_log(log)

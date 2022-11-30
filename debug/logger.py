@@ -3,7 +3,7 @@ import os
 
 
 global logger
-version = 'DVRLPv11.22.04'
+version = 'DVRLPv11.22.04T'
 
 
 def init_logger():
@@ -32,14 +32,17 @@ def init_logger():
         logger.debug("DIAGNOSTIC LOG INITIALIZED")
         return logger
     except NameError as e:
+        print(f"NameError: {e}")
         logger.error(f"NameError: {e}")
         os.mkdir(os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop', version))
         init_logger()
     except FileNotFoundError as e:
+        print(f"FileNotFoundError: {e}")
         logger.error(f"FileNotFoundError: {e}")
         os.mkdir(os.path.join(os.path.join(os.environ['USERPROFILE']), 'Desktop', version))
         init_logger()
     except FileExistsError as e:
+        print(f"FileExistsError: {e}")
         logger.error(f"FileExistsError: {e}")
 
 
