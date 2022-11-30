@@ -76,6 +76,7 @@ def filter_log(lines):
     mcu = ""
     io_error = 0
     watchdog_error = 0
+    vlost = 0
     for line in lines:
         if line.__contains__('hostname'):
             temp_list = line.split(":", 5)
@@ -91,6 +92,7 @@ def filter_log(lines):
                 log.debug(f"FIRMWARE: {firmware}")
                 if "TITAN" in firmware:
                     model = "Zeus Titan"
+
         if line.__contains__('MCU version'):
             if len(mcu) == 0:
                 temp_list = line.split(":", 6)
@@ -101,11 +103,14 @@ def filter_log(lines):
             io_error += 1
         if line.__contains__('Dvr watchdog failed, restarting dvrsvr'):
             watchdog_error += 1
+        if line.__contains__('signal lost'):
+            vlost += 1
     if model == "Zeus Titan":
         print(f"Hostname: {hostname}")
         print(f"Model: {model}")
         print(f"Firmware: {firmware}")
         print(f"MCU: {mcu}")
+        print(f"V-LOST: {vlost}")
         print(f"IO ERROR COUNT: {io_error}")
         print(f"WATCHDOG ERROR COUNT: {watchdog_error}")
     # print(f"Hostname: {hostname} - Model: {model} - Firmware: {firmware} - MCU: {mcu} - IO ERROR COUNT: {io_error}")
