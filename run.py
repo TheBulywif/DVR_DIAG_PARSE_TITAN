@@ -1,19 +1,19 @@
 import os
+import sys
 import easygui
-from past.builtins import raw_input
-
 from debug import logger
-
 
 fw_types = ["ZEUSTITAN.1.0.22.0729.14", "ZEUSTITAN.1.0.22.0812.15", "ZEUSTITAN.1.0.22.0906.13"]
 mcu_types = ["Z16RV1126_A2IRTC_V2.3_2208191530", "Z16RV1126_A2IRTC_V2.0_2207271159"]
 camera_names = ["Camera 1", "Camera 2", "Camera 3", "Camera 4", "Camera 5", "Camera 6", "Camera 7", "Camera 8",
                 "Camera 9", "Camera 10", "Camera 11", "Camera 12", "Camera 13", "Camera 14", "Camera 15", "Camera 16"]
+global io_err_count
+global wd_err_count
 
 
 def select_folder():
     log.info(f"PROMPTING USER FOR FOLDER LOCATION")
-    path = easygui.diropenbox("Select DVRLog Folder", "Select DVRLog Folder")
+    path = easygui.diropenbox("DVRLPv11.22.04T", "Select DVRLog Folder")
     log.debug(f"FOLDER SELECTED: {path}")
     return path
 
@@ -103,6 +103,32 @@ def find_titans(file_list):
     return len(titan_list), titan_list
 
 
+def error_check(titan_list):
+    titan_err_list = []
+    io_err_count = 0
+    wd_err_count = 0
+    io_err = 'One or more camera not working, system reset'
+    wd_err = 'Dvr watchdog failed, restarting dvrsvr'
+    for titan in titan_list:
+        with open(titan, 'r') as file:
+            dvrlog = file.read()
+            if dvrlog.__contains__(io_err):
+                # print(f"IO ERROR FOUND on {titan}") # DEBUG
+                io_err_count += 1
+                if titan in titan_err_list:
+                    pass
+                elif titan not in titan_err_list:
+                    titan_err_list.append(titan)
+            if dvrlog.__contains__(wd_err):
+                # print(f"WATCHDOG ERROR FOUND on {titan}") # DEBUG
+                wd_err_count += 1
+                if titan in titan_err_list:
+                    pass
+                elif titan not in titan_err_list:
+                    titan_err_list.append(titan)
+    return io_err_count, wd_err_count, titan_err_list
+
+
 def fw_check(titan_list):
     fw_totals = []
     files = titan_list
@@ -116,7 +142,7 @@ def fw_check(titan_list):
                     fw_totals.append(fw_type)
     for fw_type in fw_types:
         count = fw_totals.count(fw_type)
-        print(f"FIRMWARE {fw_type}: {count}")
+        print(f"{fw_type}: {count}")
         count = 0
     #  print(f"{fw_types}")  # DEBUG
 
@@ -167,7 +193,6 @@ def check_errors(titan_list):
                 var = var.pop()
                 # print(f"{var}")  # DEBUG
                 cameras.append(var)
-
     print(f"VLOST: {vlost}")
     for camera in camera_names:
         count = cameras.count(camera)
@@ -175,19 +200,47 @@ def check_errors(titan_list):
             print(f"{camera} FAILURES: {count}")
     print(f"IO ERROR - SYSTEM RESET: {io_error}")
     print(f"WATCHDOG ERROR - RESTART DVRSVR: {watchdog_error}")
+    print(f"IO & WATCHDOG ERROR TOTAL: {io_error + watchdog_error}")
+    print(f"PROJECTED DATA LOSS DUE TO ERRORS: {(io_error + watchdog_error)*180} SECONDS\n\n")
 
 
 if __name__ == '__main__':
-    print(f"STARTING PROGRAM")
+    print(f"STARTING PROGRAM\n\n\n")
+    input("SCHOOL NAME: ")
     log = logger.init_logger()
     logger.start_log(log)
     file_list, log_count = scan()
     titan_count, titan_list = find_titans(file_list)
+    io_count, wd_count, titan_err_list = error_check(file_list)
+    print(f"***FLEET INFORMATION***")
     print(f"TOTAL LOGS: {log_count}")
     print(f"TOTAL TITANS: {titan_count}")
-    fw_check(titan_list)
-    mcu_check(titan_list)
-    check_errors(titan_list)
+    print(f"PERCENT FAILUER RATE: {(len(titan_err_list) / log_count) * 100}%")
+    print(f"TITANS with IO ERROR: {io_count}")
+    print(f"TITANS with WATCHDOG ERROR: {wd_count}")
+    print(f"TITANS IMPACTED BY ERRORS:")
+    for titan in titan_err_list:
+        var = titan.split("\\", 4)
+        # print(f"{var}") # DEBUG
+        var = var.pop()
+        # print(f"{var}") # DEBUG
+        var = var.split("\\", 1)
+        # print(f"{var}") # DEBUG
+        var = var[0]
+        # print(f"{var}") # DEBUG
+        var = var.replace('_', '')
+        # print(f"{var}") # DEBUG
+        print(f"          {var}")
+    print(f"\n      ***IMPACTED TITAN DEMOGRAPHICS***")
+    print(f"---PLEASE NOTE: IF FIRMWARE TOTAL > TITAN TOTAL---\n"
+          f"       ---FIRMWARE OR MCU WAS UPDATED---")
+    print(f"\n***FIRMWARE***")
+    fw_check(titan_err_list)
+    print(f"\n***MCU***")
+    mcu_check(titan_err_list)
+    print(f"\n***ERRORS***")
+    check_errors(titan_err_list)
     #  print(f"{titan_list}")  # DEBUG
-    input(f"PRESS ENTER TWICE (x2) TO QUIT PROGRAM")
     logger.end_log(log)
+    input(f"PRESS ENTER TO QUIT PROGRAM")
+    sys.exit()

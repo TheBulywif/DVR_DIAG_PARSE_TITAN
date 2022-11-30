@@ -3,7 +3,7 @@ import os
 
 
 global logger
-version = 'DVRLPv11.22.04T'
+version = 'DVRLPv11.22.1T'
 
 
 def init_logger():
