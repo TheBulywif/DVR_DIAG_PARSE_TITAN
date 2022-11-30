@@ -1,10 +1,11 @@
+import math
 import os
 import sys
 import easygui
 from debug import logger
 
 fw_types = ["ZEUSTITAN.1.0.22.0729.14", "ZEUSTITAN.1.0.22.0812.15", "ZEUSTITAN.1.0.22.0906.13"]
-mcu_types = ["Z16RV1126_A2IRTC_V2.3_2208191530", "Z16RV1126_A2IRTC_V2.0_2207271159"]
+mcu_types = ["Z16RV1126_A2IRTC_V2.3_2208191530", "Z16RV1126_A2IRTC_V2.0_2207271159", "Z16RV1126_A2IRTC_V2.2_2208101330"]
 camera_names = ["Camera 1", "Camera 2", "Camera 3", "Camera 4", "Camera 5", "Camera 6", "Camera 7", "Camera 8",
                 "Camera 9", "Camera 10", "Camera 11", "Camera 12", "Camera 13", "Camera 14", "Camera 15", "Camera 16"]
 global io_err_count
@@ -201,7 +202,7 @@ def check_errors(titan_list):
     print(f"IO ERROR - SYSTEM RESET: {io_error}")
     print(f"WATCHDOG ERROR - RESTART DVRSVR: {watchdog_error}")
     print(f"IO & WATCHDOG ERROR TOTAL: {io_error + watchdog_error}")
-    print(f"PROJECTED DATA LOSS DUE TO ERRORS: {(io_error + watchdog_error)*180} SECONDS\n\n")
+    print(f"PROJECTED DATA LOSS DUE TO ERRORS: {(io_error + watchdog_error) * 180} SECONDS\n\n")
 
 
 if __name__ == '__main__':
@@ -215,22 +216,22 @@ if __name__ == '__main__':
     print(f"***FLEET INFORMATION***")
     print(f"TOTAL LOGS: {log_count}")
     print(f"TOTAL TITANS: {titan_count}")
-    print(f"PERCENT FAILUER RATE: {(len(titan_err_list) / log_count) * 100}%")
+    print(f"PERCENT FAILUER RATE: {math.trunc((len(titan_err_list) / log_count) * 100)}%")
     print(f"TITANS with IO ERROR: {io_count}")
     print(f"TITANS with WATCHDOG ERROR: {wd_count}")
-    print(f"TITANS IMPACTED BY ERRORS:")
-    for titan in titan_err_list:
-        var = titan.split("\\", 4)
+    print(f"UNIQUE TITANS IMPACTED BY ERRORS: {len(titan_err_list)}")
+    # for titan in titan_err_list:
+        # var = titan.split("\\", 4)
         # print(f"{var}") # DEBUG
-        var = var.pop()
+        # var = var.pop()
         # print(f"{var}") # DEBUG
-        var = var.split("\\", 1)
+        # var = var.split("\\", 1)
         # print(f"{var}") # DEBUG
-        var = var[0]
+        # var = var[0]
         # print(f"{var}") # DEBUG
-        var = var.replace('_', '')
+        # var = var.replace('_', '')
         # print(f"{var}") # DEBUG
-        print(f"          {var}")
+        # print(f"          {var}")
     print(f"\n      ***IMPACTED TITAN DEMOGRAPHICS***")
     print(f"---PLEASE NOTE: IF FIRMWARE TOTAL > TITAN TOTAL---\n"
           f"       ---FIRMWARE OR MCU WAS UPDATED---")
